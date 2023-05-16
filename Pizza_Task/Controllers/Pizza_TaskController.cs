@@ -17,7 +17,6 @@ namespace Pizza_Task.Controllers
 		[HttpGet("api/pizza-task/get-pizzas")]
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
-
 		public async Task<ActionResult<IEnumerable<Pizza>>> GetPizzasDB()
 		{
 			var result = await _service.GetPizzas();
@@ -26,27 +25,47 @@ namespace Pizza_Task.Controllers
 			return Ok(result);
 		}
 
-		[HttpGet("api/pizza-task/calculate-cost")]
-		[ProducesResponseType(StatusCodes.Status200OK)]
-		[ProducesResponseType(StatusCodes.Status404NotFound)]
-		public ActionResult<decimal> CalculateCost(IList<Toppings> toppings, Sizes size)
-		{
-			var result = _service.CalculateCost(toppings, size);
+        [HttpPost("api/pizza-task/calculate-cost")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public ActionResult<decimal> CalculateCost([FromBody] Pizza pizzaOrder)
+        {
+			Enum.TryParse(pizzaOrder.BasePizza.Sizes, out Sizes sizeEnum);
+            List<Toppings> toppingEnums = new List<Toppings>();
 
-			if (result == 0) return BadRequest();
+            foreach (string topping in pizzaOrder.Toppings)
+            {
+				Enum.TryParse(topping, out Toppings toppingEnum);
+				toppingEnums.Add(toppingEnum);
+            }
+
+
+            var result = _service.CalculateCost(toppingEnums, sizeEnum);
+
+			if (result == 0) return BadRequest(result);
 			return Ok(result);
-		}
+        }
 
 
-		[HttpPost("api/pizza-task/add-pizza")]
+        [HttpPost("api/pizza-task/add-pizza")]
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
-		public async Task<ActionResult> AddPizza(IList<Toppings> toppings, Sizes size)
+		public async Task<ActionResult> AddPizza([FromBody] Pizza pizzaOrder)
 		{
-			try
+
+            Enum.TryParse(pizzaOrder.BasePizza.Sizes, out Sizes sizeEnum);
+            List<Toppings> toppingEnums = new List<Toppings>();
+
+            foreach (string topping in pizzaOrder.Toppings)
+            {
+                Enum.TryParse(topping, out Toppings toppingEnum);
+                toppingEnums.Add(toppingEnum);
+            }
+
+            try
 			{
-				bool successful = await _service.AddPizza(toppings, size);
-				return successful ? Ok() : BadRequest();
+				bool successful = await _service.AddPizza(toppingEnums, sizeEnum);
+				return successful ? Ok(true) : BadRequest(false);
 			}
 			catch (ArgumentException ex)
 			{ 

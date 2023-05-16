@@ -1,20 +1,21 @@
-import { Counter } from "./components/Counter";
-import { FetchData } from "./components/FetchData";
-import { Home } from "./components/Home";
+import DisplayPizzas from './components/DisplayPizzas';
+import PizzaOrderForm from './components/PizzaOrderForm';
+
 
 const AppRoutes = [
   {
     index: true,
-    element: <Home />
+        element: <PizzaOrderForm />
   },
   {
-    path: '/counter',
-    element: <Counter />
+    path: '/display-pizzas',
+    element: <DisplayPizzas />
   },
   {
-    path: '/fetch-data',
-    element: <FetchData />
+    path: '/order-pizza',
+    element: <PizzaOrderForm />
   }
+
 ];
 
 export default AppRoutes;

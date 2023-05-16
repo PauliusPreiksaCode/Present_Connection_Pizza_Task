@@ -35,6 +35,20 @@ builder.Services.AddDbContext<DBContext>(options =>
 builder.Services.AddScoped<IPizzaService, PizzaService>();
 builder.Services.AddScoped<IPizzaRepository, PizzaRepository>();
 
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAllOrigins",
+                builder =>
+                {
+                    builder.AllowAnyOrigin()
+                           .AllowAnyMethod()
+                           .AllowAnyHeader()
+                           .WithExposedHeaders("Content-Disposition")
+                           .WithHeaders("Content-Type");
+                });
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -58,6 +72,19 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
+
+app.UseCors("AllowAllOrigins");
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllers();
+});
+
+app.Use(async (context, next) =>
+{
+    context.Response.Headers.Add("Access-Control-Allow-Headers", "Content-Type");
+    await next();
+});
+
 
 
 app.MapControllerRoute(
